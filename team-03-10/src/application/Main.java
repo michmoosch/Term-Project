@@ -18,6 +18,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 
 import javafx.scene.Scene;
@@ -99,7 +101,7 @@ public class Main extends Application {
 		label2.setPadding(new Insets(75, 75, 0, 75));
 		
 		/**
-		 * Text Fields - 
+		 * Text Fields  
 		 * 			name of journal
 		 * 			Date
 		 * 			distance
@@ -188,7 +190,12 @@ public class Main extends Application {
 		history.setPadding(new Insets(75, 75, 0, 75));
 		
 		// History table
-		TableView table = new TableView();
+		TableView table = new TableView<>();
+		
+		ArrayList<String> list = new ArrayList<>();
+    	//ObservableList<String> words = FXCollections.observableList(list);	
+		
+		
 		TableColumn<Entry, String> nameCol = new TableColumn<>("Name");
 		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 		
@@ -210,101 +217,90 @@ public class Main extends Application {
         table.setEditable(false);
         
         
+        ArrayList<String> line = new ArrayList<>();
+        String[] words = new String[100];
+        
+        
          try {
         	
         	//Create new Scanner object
-        	//
-        	Scanner in = new Scanner(new File("entries.txt"));
-        	
-        	//Loops through lines in file
+        	Scanner in = new Scanner(new File("entries.txt")).useDelimiter("\t");
+
+        	//Loops through STRINGS in file
         	while (in.hasNextLine()) {
-        		
-        		ArrayList<String> line = new ArrayList<>();
-				String[] words = new String[100];
-        		
-				line.add(in.nextLine());
+
+        		//Appends string to line ArrayList
+        		line.add(in.nextLine());
+				//line.add(in.nextLine());
+        	}
+        	
+        	//For loop splits line into 5 different
+        	for(int i = 0; i < line.size(); i++) {
 				
-				for(int i = 0; i < line.size(); i++) {
-					
-					words = line.get(i).split("\t");
-					
-				}
+				words = line.get(i).split("\t");
 				
-				//System.out.println(words[0]);
-				
-				for(int i = 0; i < words.length; i++) {
-					System.out.println(words[i]);
-				}
 				
 				Entry testt = new Entry();
 				
-				testt.setName(words[0]);
-				testt.setDate(words[1]);
-				testt.setDuration(words[2]);
-				testt.setDistance(words[3]);
-				testt.setJournal(words[4]);
-			
-				table.getItems().add(testt);
+    			testt.setName(words[0]);
+    			testt.setDate(words[1]);
+    			testt.setDuration(words[2]);
+    			testt.setDistance(words[3]);
+    			testt.setJournal(words[4]);
+
+    			table.getItems().add(testt);
 				
-        	}
+			}
         	
+        	
+    
+        	//For loop creates entry object 
+        	
+        	
+			
+			
         	
         }catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
         
+       
         
-        /*
-         * 
-         * 
-         * 
-         *
-        
-         
-        try {
-        	
-			Scanner in = new Scanner(new File("entries.txt")).useDelimiter("\t");
-			
-			
-			
-			while (in.hasNextLine()) {
-				
-				ArrayList<String> line = new ArrayList<>();
-				String[] words = new String[10];
-	
-				line.add(in.nextLine());
-				
-				for(int i =0; i < line.size(); i++) {
-				
-					words = line.get(i).split("\t");
-				}
-
-				for (int i = 0; i < words.length; i++) {
-					
-					System.out.println(words[i]);
-				}
-				
-				Entry testt = new Entry();
-				
-				testt.setName(words[0]);
-				testt.setDate(words[1]);
-				testt.setDuration(words[2]);
-				testt.setDistance(words[3]);
-				testt.setJournal(words[4]);
-			
-				table.getItems().add(testt);
+       //System.out.println(line.get(2));
+     	
+     	/*
+     	 * 
+     	 * 
+     	for(int i = 0; i < 9; i++) {
+				System.out.println(line.get(i));
+    		}
+     	
+     	
+     	line = 
+     	
+     	Name
+     	Date
+     	Duration
+     	Distacne
+     	Journal
+     	Name
+     	Date
+     	Duration
+     	Distance
+     	Journal
+     	
+     	
+     	
+			for (int j = 0; j <10; j++) {
 				
 			}
 			
-
+			System.out.println();
 			
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-       */
-        
+				
+     	*/
+         
         
 		VBox history1 = new VBox(20);
 		history1.getChildren().addAll(history, table, sceneButton);
@@ -330,7 +326,16 @@ public class Main extends Application {
 		sceneButton.setOnAction(e -> primaryStage.setScene(homeScene));
 		
 		//Change scene to View History
-		btn2.setOnAction(e -> primaryStage.setScene(viewHistory));
+		//btn2.setOnAction(e -> primaryStage.setScene(viewHistory));
+		btn2.setOnAction(new EventHandler<ActionEvent>() {
+			
+			@Override
+			public void handle(ActionEvent t) {
+				primaryStage.setScene(viewHistory);
+				table.getColumns().clear();
+				table.getColumns().addAll(nameCol, dateCol, distCol);
+				}
+			});
 		
 		//Gather and input text fields into entry object
 		submit.setOnAction(new EventHandler<ActionEvent>() {
@@ -347,13 +352,14 @@ public class Main extends Application {
 				
 				// Entry( Name, Date, Duration, Distance, Entry)
 				String entryField = entry.getText();
-				Entry entry = new Entry(name.getText(), date.getText(), time.getText(), distance.getText(), entryField );
+				Entry temp = new Entry(name.getText(), date.getText(), time.getText(), distance.getText(), entryField );
 				
 				
 				 try {
 					FileOutputStream out = new FileOutputStream("entries.txt", true);
 					
-					byte[] bytesArr = entry.toString().getBytes();
+					byte[] bytesArr = temp.toString().getBytes();
+					
 					try {
 						out.write(bytesArr);
 					} catch (IOException e) {
@@ -366,7 +372,11 @@ public class Main extends Application {
 				}
 				
 				
-			
+				name.clear();
+				date.clear();
+				distance.clear();
+				time.clear();
+				entry.clear();
 								
 				
 				primaryStage.setScene(homeScene);
