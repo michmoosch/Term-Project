@@ -1,6 +1,1 @@
 Sample	11/23/2021	2 Hours	4.5	This was a great hike.
-Sample2	11/25/2021	1 Hours	1	Nice trees.
-A	B	D	C	4
-A	D	E	S	askdlj
-ZZZZ	ZZZ	ZZZ	ZZZ	ZZZ
-YYYY	YYY	YY	YY	YYYY

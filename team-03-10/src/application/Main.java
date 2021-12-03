@@ -7,11 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.function.UnaryOperator;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -36,6 +41,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -52,6 +58,11 @@ import application.Entry;
 
 public class Main extends Application {
 	
+	public boolean isValidName(String s){      
+	     String regex="[A-Za-z\\s]+";      
+	      return s.matches(regex);//returns true if input and regex matches otherwise false;
+	 }
+
 	
 	@Override
 	public void start(Stage primaryStage) {
@@ -63,7 +74,6 @@ public class Main extends Application {
 		title.setStyle("-fx-text-fill: white;");
 		title.setFont(new Font("Times New Roman", 50));
 		title.setPadding(new Insets(75, 75, 0, 75));
-		
 		
 		//1st Button
 		Button btn1 = new Button("Record Your Journey");
@@ -160,10 +170,11 @@ public class Main extends Application {
 		gpforText.getChildren().add(submit);
 		
 		//Change scene to home Screen
-		Button sceneButton = new Button("Go to Home Screen");
-		sceneButton.setAlignment(Pos.CENTER);		
+		Button sceneButton = new Button("Go to Home Screen");		
 		sceneButton.setFont(Font.font("Times New Roman", 20));
-		
+		sceneButton.setAlignment(Pos.CENTER);
+		//gpforText.getChildren().add(sceneButton);
+		//gpforText.setConstraints(sceneButton, 0, 6);
 		
 		gpforText.setAlignment(Pos.CENTER);
 		
@@ -183,7 +194,7 @@ public class Main extends Application {
 
 		//-----------------History Screen------------------------
 		
-		
+		//History Label
 		Label history = new Label("History");
 		history.setStyle("-fx-text-fill: white;");
 		history.setFont(new Font("Times New Roman", 50));
@@ -192,34 +203,29 @@ public class Main extends Application {
 		// History table
 		TableView table = new TableView<>();
 		
-		ArrayList<String> list = new ArrayList<>();
-    	//ObservableList<String> words = FXCollections.observableList(list);	
-		
-		
+		//Handles Table Columns
 		TableColumn<Entry, String> nameCol = new TableColumn<>("Name");
 		nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-		
         TableColumn<Entry, String> dateCol = new TableColumn<>("Date");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
-        
         TableColumn<Entry, String> distCol = new TableColumn<>("Distance Hiked");
         distCol.setCellValueFactory(new PropertyValueFactory<>("distance"));
-        
         nameCol.setPrefWidth(200);
         dateCol.setPrefWidth(200);
         distCol.setPrefWidth(200);
         
+        //Table Attributes
         table.getColumns().addAll(nameCol, dateCol, distCol);
-        
-        
         table.setMaxSize(600, 400);
+        table.setEditable(true);
         
-        table.setEditable(false);
-        
-        
+        //ArrayList of lines from database file
         ArrayList<String> line = new ArrayList<>();
-        String[] words = new String[100];
         
+        //Array of Single words
+        String[] words = new String[5];
+        
+        ObservableList<Entry> obsList = FXCollections.observableArrayList();	
         
          try {
         	
@@ -231,12 +237,13 @@ public class Main extends Application {
 
         		//Appends string to line ArrayList
         		line.add(in.nextLine());
-				//line.add(in.nextLine());
+				
         	}
         	
         	//For loop splits line into 5 different
         	for(int i = 0; i < line.size(); i++) {
 				
+        		//Split the line into words
 				words = line.get(i).split("\t");
 				
 				
@@ -248,64 +255,29 @@ public class Main extends Application {
     			testt.setDistance(words[3]);
     			testt.setJournal(words[4]);
 
+    			obsList.add(testt);
     			table.getItems().add(testt);
-				
+
 			}
-        	
-        	
-    
-        	//For loop creates entry object 
-        	
-        	
-			
-			
-        	
+
         }catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
         
-       
-        
-       //System.out.println(line.get(2));
-     	
-     	/*
-     	 * 
-     	 * 
-     	for(int i = 0; i < 9; i++) {
-				System.out.println(line.get(i));
-    		}
-     	
-     	
-     	line = 
-     	
-     	Name
-     	Date
-     	Duration
-     	Distacne
-     	Journal
-     	Name
-     	Date
-     	Duration
-     	Distance
-     	Journal
-     	
-     	
-     	
-			for (int j = 0; j <10; j++) {
-				
-			}
-			
-			System.out.println();
-			
-				
-     	*/
-         
+         //Delete Button
+        Button deleteButton = new Button("Delete");
+        deleteButton.setFont(Font.font("Times New Roman", 20));
+        deleteButton.setAlignment(Pos.CENTER);
+		
+        HBox hbox = new HBox(20);
+        hbox.getChildren().addAll(deleteButton, sceneButton);
+        hbox.setAlignment(Pos.TOP_CENTER);
         
 		VBox history1 = new VBox(20);
-		history1.getChildren().addAll(history, table, sceneButton);
+		history1.getChildren().addAll(history, table, hbox);
 		history1.setAlignment(Pos.TOP_CENTER);
-		history1.setSpacing(100);
+		history1.setSpacing(10);
 		
 		Scene viewHistory = new Scene(history1, 1200, 800);
 		history1.setStyle("-fx-background-color: #607658;");
@@ -343,34 +315,51 @@ public class Main extends Application {
 			@Override
 			public void handle(ActionEvent t) {
 				
-				//Alert
-				Alert alert = new Alert(AlertType.INFORMATION);
-				alert.setTitle("Journal Entry");
-				alert.setContentText("Your Journal entry was succesfully logged!");
-				alert.setHeaderText("Journal Entry Submitted");
-				alert.showAndWait();
+				
 				
 				// Entry( Name, Date, Duration, Distance, Entry)
 				String entryField = entry.getText();
 				Entry temp = new Entry(name.getText(), date.getText(), time.getText(), distance.getText(), entryField );
 				
-				
-				 try {
-					FileOutputStream out = new FileOutputStream("entries.txt", true);
+				if(isValidName(name.getText()) && isValidName(date.getText())
+						&& isValidName(time.getText()) &&  isValidName(distance.getText()) && isValidName(entryField)){
 					
-					byte[] bytesArr = temp.toString().getBytes();
+					table.getItems().add(temp);
+					obsList.add(temp);
 					
 					try {
-						out.write(bytesArr);
-					} catch (IOException e) {
+						FileOutputStream out = new FileOutputStream("entries.txt", true);
+						
+						byte[] bytesArr = temp.toString().getBytes();
+						
+						try {
+							out.write(bytesArr);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					} catch (FileNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
+					//Successful Alert
+					Alert alert = new Alert(AlertType.INFORMATION);
+					alert.setTitle("Journal Entry");
+					alert.setContentText("Your Journal entry was succesfully logged!");
+					alert.setHeaderText("Journal Entry Submitted");
+					alert.showAndWait();
+					
+					primaryStage.setScene(homeScene);
 				}
-				
+				else {
+					//Successful Alert
+					Alert alert = new Alert(AlertType.INFORMATION);
+					alert.setTitle("Error");
+					alert.setContentText("Fill in all entries bruh");
+					alert.setHeaderText("Invalid Input");
+					alert.showAndWait();
+				}
 				
 				name.clear();
 				date.clear();
@@ -378,14 +367,50 @@ public class Main extends Application {
 				time.clear();
 				entry.clear();
 								
-				
-				primaryStage.setScene(homeScene);
-				
-							
-				
+
 			}
 			
 		});
+		
+		
+		deleteButton.setOnAction(e -> {
+		    Object selectedItem = table.getSelectionModel().getSelectedItem();
+		    table.getItems().remove(selectedItem);
+		    obsList.remove(selectedItem);
+		    
+		    
+		    try {
+				PrintWriter pw = new PrintWriter("entries.txt");
+				pw.close();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		    
+		    
+		    for (int i = 0; i < obsList.size(); i++) {
+		    	
+		    	try {
+					FileOutputStream out = new FileOutputStream("entries.txt", true);
+					
+					byte[] bytesArr = obsList.get(i).toString().getBytes();
+					
+					try {
+						out.write(bytesArr);
+					} catch (IOException g) {
+						// TODO Auto-generated catch block
+						g.printStackTrace();
+					}
+				} catch (FileNotFoundException g) {
+					// TODO Auto-generated catch block
+					g.printStackTrace();
+				}
+		    	
+		    }
+		    
+		    
+		});
+		
 		
 		//-----------------END---Button Actions----------------
 		
@@ -402,8 +427,5 @@ public class Main extends Application {
 	
 	
 }
-
-
-
 
 
