@@ -64,10 +64,11 @@ public class Main extends Application {
 	// String Validator
 	public boolean isValidStr(String s){      
 	     String regex="^[a-zA-Z0-9\\s\\/.,!?]+$";      
-	      return s.matches(regex);//returns true if input and regex matches otherwise false;
+	     //returns true if input matches otherwise, false;
+	      return s.matches(regex);
 	 }
 
-	
+	//Start method
 	@Override
 	public void start(Stage primaryStage) {
 		
@@ -98,9 +99,7 @@ public class Main extends Application {
 		//Home scene
 		homeScreen.getChildren().addAll(title, btn1, btn2);
 		Scene homeScene = new Scene(homeScreen, 1200, 800);
-		
-		
-		
+
 		////--------END---Home Screen------------------------
 		
 		
@@ -108,8 +107,7 @@ public class Main extends Application {
 		
 		
 		//-----------------Record Your Journey Screen------------------------
-		
-		
+
 		/**
 		 * Text Fields  
 		 * 			name of journal
@@ -175,19 +173,20 @@ public class Main extends Application {
 		gpforText.setConstraints(submit, 0, 5);
 		gpforText.getChildren().add(submit);
 		
-		//Change scene to home Screen
+		//Home Button 1
 		Button sceneButton = new Button("Go Home");		
 		sceneButton.setFont(Font.font("Times New Roman", 20));
 		sceneButton.setPrefWidth(175);
 		
-		//Home button
+		//Home button 2
 		Button goHome = new Button("Go home");
+		goHome.setAlignment(Pos.CENTER);
 		goHome.setPrefWidth(500);
+		
+		//Add home button to gridpane
 		gpforText.setConstraints(goHome, 0, 6);
 		gpforText.getChildren().add(goHome);
-		
-		
-		
+
 		//Layout for record Your journey
 		VBox layout2 = new VBox(20);
 		layout2.getChildren().addAll(label2, gpforText);
@@ -197,9 +196,7 @@ public class Main extends Application {
 		//Journey Scene
 		Scene addJourney = new Scene(layout2, 1200, 800);
 		layout2.setStyle("-fx-background-color: #607658;");
-		
 
-		
 		//--------END----------Record Your Journey Screen----------------
 		
 
@@ -221,11 +218,9 @@ public class Main extends Application {
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
         TableColumn<Entry, String> distCol = new TableColumn<>("Distance Hiked");
         distCol.setCellValueFactory(new PropertyValueFactory<>("distance"));
-        
         nameCol.setPrefWidth(200);
         dateCol.setPrefWidth(200);
         distCol.setPrefWidth(200);
-        
         
         //Table Attributes
         table.getColumns().addAll(nameCol, dateCol, distCol);
@@ -238,9 +233,10 @@ public class Main extends Application {
         //ArrayList of lines from database file
         ArrayList<String> line = new ArrayList<>();
         
-        //Array of Single words
+        //Array of Single strings
         String[] words = new String[5];
         
+        //Observable list to hold Entry objects
         ObservableList<Entry> obsList = FXCollections.observableArrayList();	
         
          try {
@@ -326,7 +322,7 @@ public class Main extends Application {
 		popupBox.setPrefWidth(500);
 		popupBox.setPrefHeight(500);
 		
-		//Scene acts as a popup
+		//Scene for detailed view
 		Scene pop = new Scene(popupBox, 1200, 800);
 		
 		//Back button
@@ -348,14 +344,12 @@ public class Main extends Application {
 		sceneButton.setOnAction(e -> primaryStage.setScene(homeScene));
 		goHome.setOnAction(e -> primaryStage.setScene(homeScene));
 		
-		//Change scene to View History and Refresh Table
+		//Change scene to View History
 		btn2.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent t) {
 				primaryStage.setScene(viewHistory);
-				//table.getColumns().clear();
-				//table.getColumns().addAll(nameCol, dateCol, distCol);
 				}
 			});
 		
@@ -408,7 +402,7 @@ public class Main extends Application {
 					//Failed Alert
 					Alert alert = new Alert(AlertType.INFORMATION);
 					alert.setTitle("Error");
-					alert.setContentText("All entries must be filled, and contain numbers, letters, or a backslash");
+					alert.setContentText("All entries must be filled, and contain numbers, letters, or punctuation");
 					alert.setHeaderText("Invalid Input");
 					alert.showAndWait();
 				}
@@ -472,7 +466,7 @@ public class Main extends Application {
 			// Shows a detailed view of a single entry
 			@Override
 			public void handle(ActionEvent event) {
-				//singleTable.getItems().add(selectedItem);
+				
 				Entry viewE = table.getSelectionModel().getSelectedItem();
 		        
 		        Label viewName = new Label("Name: " + viewE.getName());
@@ -506,25 +500,7 @@ public class Main extends Application {
 		        //Change scene to the detailed entry view
 		        primaryStage.setScene(pop);
 		        
-		        /*
-		         
-		         
-		        if(popup.isShowing()) {
-		        	popup.hide();
-		        	popupBox.getChildren().clear();
-		        }
-		        else
-		        	popup.show(primaryStage);
-		        
-		        Button exit = new Button("Close");
-		        popupBox.getChildren().add(exit);
-		        
-		        exit.setOnAction(e -> {
-		        	
-		        	popup.hide();
-		        	popupBox.getChildren().clear();
-		        	
-		        });*/
+		       
 			}
 		}); // END View Button Handler
 		
@@ -549,8 +525,6 @@ public class Main extends Application {
 	public static void main(String[] args) {
 		launch(args);
 	}
-	
-	
 	
 }
 
